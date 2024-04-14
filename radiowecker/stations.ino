@@ -5,7 +5,7 @@
 
 //Definition of a set of tested default stations
 Station defstations[DEFAULTSTATIONS] PROGMEM = {
-{"http://stream01.zogl.net:8906/stream","Radino",1},
+{"http://mp3channels.webradio.rockantenne.de/rockantenne-bayern","Rockantenne Bayern",1},
 {"http://radio.toggo.de/live/mp3-192/radio.toggo.de/","Toggo",1},
 {"http://streams.radiobob.de/bob-national/mp3-192/mediaplayer","BOB",1},
 {"http://stream.laut.fm/hoerspiel","Hörspiele",1},

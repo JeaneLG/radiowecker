@@ -65,7 +65,6 @@ void handleRoot() {
     }
     server.send(200,"text/html",CONFIG_page); //send the config page to the client
   }
-
 }
 
 //AJAX command /cmd/stations
@@ -283,13 +282,13 @@ void restart(){
 void startPlay(){
   toggleRadio(false);
   //respond with OK
-  server.send(200,"text/plain","OK");  
+  server.send(200,"text/plain","OK");
 }
 //AJAX command /cmd/startPlay
 void stopPlay(){
   toggleRadio(true);
   //respond with OK
-  server.send(200,"text/plain","OK");  
+  server.send(200,"text/plain","OK");
 }
 //AJAX command /cmd/GainSlider
 void GainSlider() {
