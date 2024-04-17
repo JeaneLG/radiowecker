@@ -157,7 +157,7 @@ void onTouchClick(TS_Point p) {
 // safe the changed alarm time and show 'OK'
 void safeAlarmTime() {
   start_conf -= 9000;
-  tft.fillRect(140,110,200,40,COLOR_SETTING_BG);
+  tft.fillRect(140,108,190,48,COLOR_SETTING_BG);
   tft.drawRect(175,111,65,35,COLOR_SETTING_BORDER);
   tft.setTextColor(COLOR_SETTING_ALARM_TEXT);
   tft.setCursor(180, 140);
@@ -295,7 +295,7 @@ void setBGLight(uint8_t prct) {
   uint16_t ledb;
   //if brightness is 0, we read the ambient light from LDR
   if (prct == 0) {
-    // Thx to RenÃ© Herzmann
+    // Thx to René Herzmann
     /*
     Bei Nutzung des LDR (Slider Helligkeit auf null) fing das Display an zu flackern.
     Jetzt wird nur alle 10 Sekunden die Helligkeit des Displays eingestellt. 
@@ -572,8 +572,6 @@ void displayClear() {
   tft.fillScreen(COLOR_BG);
 }
 
-
-
 //show date, time and loudness in the first line
 void displayDateTime() {
   Serial.println("Show Time");
@@ -771,6 +769,8 @@ void showAlarmTime() {
   tft.println(configView);
   tft.setCursor(150, 140);
   tft.print("Speichern");
+  tft.drawRect(146,111,169,40,COLOR_SETTING_BORDER);
+  tft.drawRect(144,109,173,44,COLOR_SETTING_BORDER2);
   tft.drawBitmap(16,92,symbole2[0],32,16,COLOR_SETTING_UP_DOWN);
   tft.drawRect(8,91,48,18,COLOR_SETTING_BORDER);
   tft.drawBitmap(68,92,symbole2[0],32,16,COLOR_SETTING_UP_DOWN);
