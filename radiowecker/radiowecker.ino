@@ -19,6 +19,9 @@
 // pin for Beeper
 #define BEEPER 21
 
+// programm version
+#define VERSION "2.1.4"
+
 //instance of prefernces
 Preferences pref;
 Preferences sender;
@@ -162,6 +165,8 @@ void setup() {
     minutes = ti.tm_hour * 60 + ti.tm_min;
     weekday = ti.tm_wday;
     Serial.println("Start");
+    Serial.print("Version: ");
+    Serial.println(VERSION);
     //if alarm is on get date and time for next alarm
     if (pref.isKey("alarmon") && pref.getBool("alarmon")) findNextAlarm();
     //Display time and next alarm if one is set
@@ -240,7 +245,7 @@ void loop() {
   }
   //timed event updatetime display every minute
   if ((millis() - tick) > 30000) {
-    tick = millis() - ti.tm_sec * 1000;//kingherold ISSUE Time not correct
+    tick = millis() - ti.tm_sec * 1000 + 200;//kingherold ISSUE Time not correct
     //get date and time information
     if (connected && getLocalTime(&ti)) {
       minutes = ti.tm_hour * 60 + ti.tm_min;
