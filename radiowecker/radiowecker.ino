@@ -20,7 +20,7 @@
 #define BEEPER 21
 
 // programm version
-#define VERSION "2.1.4"
+#define VERSION "2.2.2"
 
 //instance of prefernces
 Preferences pref;
@@ -33,7 +33,8 @@ typedef struct {
   uint8_t enabled;//flag to activate the station
 } Station;
 
-#define STATIONS 30 //number of stations in the list
+#define STATIONS 30          // number of stations in the list
+#define MINUTES_PER_DAY 1440 // minutes a day has
 
 //gloabal variables
 Station stationlist[STATIONS];    //list of available stations
@@ -44,15 +45,19 @@ String ntp = "de.pool.ntp.org";   //NTP server url
 uint8_t curStation = 0;           //index for current selected station in stationlist
 uint8_t curGain = 200;            //current loudness
 uint8_t snoozeTime = 30;          //snooze time in minutes
+uint8_t alarmPauseTime = 10;      //alarm pause time in minutes
 uint16_t alarm1 = 390;            //first alarm time 6:30
 uint8_t alarmday1 = 0B00111110;   //valid weekdays (example 00111110 means monday through friday)
 uint16_t alarm2 = 480;            //second alarm time 8:00
 uint8_t alarmday2 = 0B01000001;   //valid week days (example 01000001 means sunday and saturday)
+uint16_t alarm3 = 480;            //third alarm time 8:00
+uint8_t alarmday3 = 0B00000000;   //valid week days (example 00000000 means alarm is disabled)
 uint8_t actStation = 0;           //index for current station in station list used for streaming 
 uint8_t bright = 25;              //brightness in percent. 0 means use LDR to control brightness
 //other global variables
 uint32_t lastchange = 0;          //time of last selection change
 uint8_t snoozeWait = 0;           //remaining minutes for snooze
+int16_t snoozeEndTime = -1;       //minutes from midnight for sleep end
 uint16_t alarmtime = 0;           //next relevant alarm time
 uint8_t alarmday = 8;             //weekday for next relevant alarm or 8 means alarm disabled
 char title[64];                   //character array to hold meta data message
@@ -66,7 +71,7 @@ int16_t lastldr;                  //last value from LDR sensor to detect changes
 uint32_t start_conf;              //time of entering config screen
 boolean connected;                //flag to signal active connection
 boolean radio = false;            //flag to signal radio output
-boolean alarmOn = false;            //flag to signal alarm is ongoing
+boolean alarmOn = false;          //flag to signal alarm is ongoing
 boolean clockmode = true;         //flag to signal clock is shown on the screen
 boolean configpage = false;       //flag to signal config is shown on the screen
 boolean radiopage = false;        //flag to signal radioselect is shown on the screen
@@ -84,26 +89,31 @@ void findNextAlarm() {
   if (getLocalTime(&ti)) { //get current date and time
     wd = weekday; //variable to iterate over weekdays starting with today
     alarmday = 8;  //alarmday = 8 means no alarm
+    alarmtime = MINUTES_PER_DAY + 1;
     mask = 1 << wd;  //mask to filter weekday to be tested
     //test if alarm settings 1 matchs
-    if ((alarmday == 8) && ((alarmday1 & mask) != 0) && (alarm1 > minutes)) 
+    if (((alarmday1 & mask) != 0) && (alarm1 > minutes)) 
       { alarmtime = alarm1; alarmday = wd;}
     //test if alarm settings 2 matchs
-    if ((alarmday == 8) && ((alarmday2 & mask) != 0) && (alarm2 > minutes)) 
+    if (((alarmday2 & mask) != 0) && (alarm2 > minutes) && (alarmtime > alarm2)) 
       { alarmtime = alarm2; alarmday = wd;}
-    if (alarmday == 8) { //if no alarm continue search
+    //test if alarm settings 3 matchs
+    if (((alarmday3 & mask) != 0) && (alarm3 > minutes) && (alarmtime > alarm3))
+      { alarmtime = alarm3; alarmday = wd;}
+    if (alarmday == 8) {
       do {
         wd++; //next weekday
         if (wd > 7) wd = 0;
         mask = 1 << wd;
         //test if alarm settings 1 matchs
-        if ((alarmday == 8) && ((alarmday1 & mask) != 0) ) { alarmtime = alarm1; alarmday = wd;}
-        //test if alarm settings 1 matchs
-        if ((alarmday == 8) && ((alarmday2 & mask) != 0) ) { alarmtime = alarm2; alarmday = wd;}
+        if ((alarmday1 & mask) != 0) { alarmtime = alarm1; alarmday = wd;}
+        //test if alarm settings 2 matchs
+        if (((alarmday2 & mask) != 0) && (alarmtime > alarm2)) { alarmtime = alarm2; alarmday = wd;}
+        //test if alarm settings 3 matchs
+        if (((alarmday3 & mask) != 0) && (alarmtime > alarm3)) { alarmtime = alarm3; alarmday = wd;}
         
       } while ((alarmday == 8) && (wd != weekday)); //continue until an valid alarm was found or a week is over
     }
-    
     Serial.printf("Next alarm %i on %i\n",alarmtime,alarmday);
   }
 }
@@ -136,6 +146,10 @@ void setup() {
   if (pref.isKey("alarm2")) alarm2 = pref.getUInt("alarm2");
   alarmday2 = 0B01000001; //so,sa
   if (pref.isKey("alarmday2")) alarmday2 = pref.getUShort("alarmday2");
+
+  if (pref.isKey("alarm3")) alarm3 = pref.getUInt("alarm3");
+  alarmday3 = 0B00000000; //off
+  if (pref.isKey("alarmday3")) alarmday3 = pref.getUShort("alarmday3");
   alarmtime = 0;
   alarmday = 8; //alarm is off
   curStation = 0; //default value
@@ -160,7 +174,7 @@ void setup() {
     configTzTime("CET-1CEST,M3.5.0/03,M10.5.0/03", ntp.c_str());
     //show date and time and the name of the station
     delay(500);
-    //fill timestarukture ti, minutes and weekday with now
+    //fill time structure ti, minutes and weekday with now
     getLocalTime(&ti);
     minutes = ti.tm_hour * 60 + ti.tm_min;
     weekday = ti.tm_wday;
@@ -202,8 +216,8 @@ void loop() {
   touch_loop();
   //after 15 seconds switch back from config screen to clock screen
   if (!clockmode && ((millis() - start_conf) > 15000)) {
-    showClock();
     clockmode = true;
+    showClock();
   }
   //show metadata if radio is active
   if (newTitle && radio && clockmode) {
@@ -244,8 +258,8 @@ void loop() {
     }
   }
   //timed event updatetime display every minute
-  if ((millis() - tick) > 30000) {
-    tick = millis() - ti.tm_sec * 1000 + 200;//kingherold ISSUE Time not correct
+  if ((millis() - tick) > 60000) {
+    tick = millis() - ti.tm_sec * 1000 + 500;//kingherold ISSUE Time not correct
     //get date and time information
     if (connected && getLocalTime(&ti)) {
       minutes = ti.tm_hour * 60 + ti.tm_min;
@@ -258,9 +272,12 @@ void loop() {
     }
     //if we are in snooze mode decrement snooze counter
     //and turn radio off if snooze counter is zero
-    if (snoozeWait > 0) {
-      snoozeWait--;
-      if (snoozeWait == 0) {
+    if (snoozeEndTime > -1) {
+      // handle endtime after midnight
+      if ((snoozeEndTime >= MINUTES_PER_DAY) && (minutes < 10)) snoozeEndTime -= MINUTES_PER_DAY;
+      // check if sleep time is over
+      if (minutes >= snoozeEndTime) {
+        snoozeEndTime= -1;
         toggleRadio(true);
         showRadio();
       }

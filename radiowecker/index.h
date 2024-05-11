@@ -170,8 +170,8 @@ function getAlarms() {
       data:{},
       success: function(data){
           const parts = data.split("\n");
-          for (var i = 0; i < 16; i++) {
-              if ((i==0) || (i==8)) {
+          for (var i = 0; i < 24; i++) {
+              if ((i==0) || (i==8) || (i==16)) {
                   $("#al"+i).val(parts[i]);
               } else {
                   if (parts[i]=='1') {
@@ -198,8 +198,8 @@ function saveSSID() {
 
 function setAlarms() {
     const vals = new Object();
-    for (var i = 0; i < 16; i++) {
-        if ((i == 0) || (i == 8)) {
+    for (var i = 0; i < 24; i++) {
+        if ((i == 0) || (i == 8) || (i == 16)) {
             vals['al'+i] = $("#al"+i).val();
         } else {
             vals['al'+i] = $("#al"+i).prop("checked")?'1':'0';
@@ -534,7 +534,7 @@ input {
             <span>Sa</span>
         </label>
         <label>
-            <input id="al1" type="checkbox"/>
+            <input type="checkbox" id="al1"/>
             <span>So</span>
         </label>
       </div>
@@ -570,6 +570,41 @@ input {
         </label>
         <label>
             <input type="checkbox" id="al9"/>
+            <span>So</span>
+        </label>
+      </div>
+      <br />
+      <label>Weckzeit 3:
+          <input id="al16" type="time"/>
+      </label>
+      <br />
+      <div class="categorie days"  align="center">
+        <label>
+            <input type="checkbox" id="al18"/>
+            <span>Mo</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al19"/>
+            <span>Di</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al20"/>
+            <span>Mi</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al21"/>
+            <span>Do</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al22"/>
+            <span>Fr</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al23"/>
+            <span>Sa</span>
+        </label>
+        <label>
+            <input type="checkbox" id="al17"/>
             <span>So</span>
         </label>
       </div>

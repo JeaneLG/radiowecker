@@ -27,7 +27,7 @@
 //day and month names in German
 const char* const PROGMEM days[] = {"Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"};
 const char* const PROGMEM days_short[] = {"So","Mo","Di","Mi","Do","Fr","Sa"};
-const char* PROGMEM months[] = {"Jan.","Feb.","März","April","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."};
+const char* PROGMEM months[] = {"Jan.","Feb.","MÃ¤rz","April","Mai","Juni","Juli","Aug.","Sept.","Okt.","Nov.","Dez."};
 
 //instance of display driver
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -116,9 +116,9 @@ void onTouchClick(TS_Point p) {
       //we need the p.x position to find which button was clicked
       if (p.x < 64) showCommand(1);
       if ((p.x>64) && (p.x<128)) showCommand(2);
-//      if ((p.x>128) && (p.x<192)) showCommand(3);
+      if ((p.x>128) && (p.x<192)) showCommand(3);
       if ((p.x>192) && (p.x<256)) showCommand(4);
-      if (p.x > 256) {//rechter Button zurück auf Main
+      if (p.x > 256) {//rechter Button zurueck auf Main
         clockmode = true;
         configpage = false;
         radiopage = false;
@@ -139,6 +139,7 @@ void onTouchClick(TS_Point p) {
         break;
       case 1:
       case 2:
+      case 3:
         // Save button
         if ((p.y > 120) && (p.y < 150) && (p.x > 160)) {
           safeAlarmTime();
@@ -177,9 +178,16 @@ void safeAlarmTime() {
       alarmday2 = alarmConfig.alarmday;
       pref.putUInt("alarm2",alarm2);
       pref.putUShort("alarmday2",alarmday2);
+    } else {
+      if (configView == 3) {
+        alarm3 = alarmtime;
+        alarmday3 = alarmConfig.alarmday;
+        pref.putUInt("alarm3",alarm3);
+        pref.putUShort("alarmday3",alarmday3);
+      }
     }
   }
-  findNextAlarm();
+  if (alarmday < 8) findNextAlarm(); // if alarm is enabled update next alarm
 }
 
 // enable/disable a day for the alarm
@@ -235,7 +243,7 @@ void setGainValue(uint16_t value, const char* sliderPage) {
   if(sliderPage != "WEBSITE"){
     // calculate gain from x-Position 0 to 100%
     int y_start = 11;  // 11 = Startlinie y
-    int line_length = 298;  // 298 = Länge der Linie
+    int line_length = 298;  // 298 = Lï¿½nge der Linie
 
     float start_slider = value - y_start;  // Bereich vor dem Linienstart abziehen
     float end_slider = line_length - y_start;  // Bereich vor dem Linienstart abziehen
@@ -295,7 +303,7 @@ void setBGLight(uint8_t prct) {
   uint16_t ledb;
   //if brightness is 0, we read the ambient light from LDR
   if (prct == 0) {
-    // Thx to René Herzmann
+    // Thx to RenÃ© Herzmann
     /*
     Bei Nutzung des LDR (Slider Helligkeit auf null) fing das Display an zu flackern.
     Jetzt wird nur alle 10 Sekunden die Helligkeit des Displays eingestellt. 
@@ -388,8 +396,8 @@ void toggleAlarm() {
   }
 
 void startSnooze() {
-  // because we decrement snoozeWait every 30 seconds
-  snoozeWait = snoozeTime * 2;
+  snoozeWait = snoozeTime;
+  snoozeEndTime = minutes + snoozeTime;
   toggleRadio(false);
   clockmode = true;
   showClock();
@@ -451,7 +459,7 @@ void textInBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const char* text,
   sp =wt;
   //Serial.printf("Space = %i\n",sp);
   tft.getTextBounds(tmp,0,100,&xt,&yt,&wt,&ht);
-  //Serial.printf("Text %s Länge %i\n",text,wt);
+  //Serial.printf("Text %s Laenge %i\n",text,wt);
   h0 = 100 - yt;
   x0 = x;
   y = y + h0 +1;
@@ -469,7 +477,7 @@ void textInBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const char* text,
     len = 0;
     while ((token != NULL) && (l>0)) {
       tft.getTextBounds(token,0,100,&xt,&yt,&wt,&ht); 
-      Serial.printf("Token %s Länge %i gesamt %s Länge %i Line %i\n",token,wt,msg,len,l);
+      Serial.printf("Token %s LÃ¤nge %i gesamt %s LÃ¤nge %i Line %i\n",token,wt,msg,len,l);
       if ((len + wt + sp) < w) {
         if (len > 0) { strcat(msg," "); len +=sp; }
         len = len + wt;
@@ -487,7 +495,6 @@ void textInBox(uint16_t x, uint16_t y, uint16_t w, uint16_t h, const char* text,
       }
       Serial.println(token);
       token = strtok(NULL, " ");
-      
     }
     if ((len > 0) && (l>0)) {
       x0 = x;
@@ -510,7 +517,7 @@ void updateTime(boolean redraw) {
 
     if (getLocalTime(&ti)) {
         sprintf(tim,"%s %i. %s %i",days[ti.tm_wday],ti.tm_mday,months[ti.tm_mon],ti.tm_year + 1900);
-        // Wenn redraw true ist oder das Datum sich geändert hat, wird die Datumszeile neu gezeichnet.
+        // Wenn redraw true ist oder das Datum sich geï¿½ndert hat, wird die Datumszeile neu gezeichnet.
         if (redraw || (strcmp(tim,lastdate) != 0)) {
             strcpy(lastdate,tim);
             textInBox(0,90,320,25,tim,ALIGNCENTER,true,COLOR_DATE,COLOR_BG,1);
@@ -519,7 +526,7 @@ void updateTime(boolean redraw) {
         strftime(tim, sizeof(tim), "%H:%M", &ti);
         Serial.printf("Zeit = %s\n",tim);
         // Wir durchlaufen den Zeit-String.
-        // Wenn redraw true ist oder sich eine Ziffer geändert hat, wird diese Ziffer neu gezeichnet.
+        // Wenn redraw true ist oder sich eine Ziffer geï¿½ndert hat, wird diese Ziffer neu gezeichnet.
         for (uint8_t i = 0; i<5; i++) {
             z = (i==2)?10:tim[i]-'0';
             //Serial.printf("Ziffer %i %c = %c\n",z,tim[i],lasttime[i]);
@@ -541,14 +548,14 @@ void drawHeaderInfos(){
 
 void drawWifiInfo() {
     int rssi = WiFi.RSSI(); // Hole den RSSI-Wert
-    char rssiChar[5]; // Char-Array für textInBox
+    char rssiChar[5]; // Char-Array fï¿½r textInBox
     snprintf(rssiChar, sizeof(rssiChar), "%d", rssi);
     uint16_t color_wifi; // Farbvariable
     if (rssi <= -70) {// Schwacher Empfang (z.B. Rot)
         color_wifi = ILI9341_RED;
     } else if (rssi <= -50) {// Mittlerer Empfang (Z.B. Gelb)
         color_wifi = ILI9341_YELLOW;
-    } else {// Starker Empfang (Z.B. Grün)
+    } else {// Starker Empfang (Z.B. Grï¿½n)
         color_wifi = ILI9341_GREEN;
     }
     tft.drawBitmap(303, 0, symbole[0], 17, 17, color_wifi, COLOR_BG);
@@ -601,13 +608,13 @@ void encodeUnicode(const char* src, char* dst){
     if (c==195) { //UTF8 characters german umlauts
       i++;
       switch (src[i]) {
-        case 164: c=130; break; //ä
-        case 182: c=131; break; //ö
-        case 188: c=132; break; //ü
-        case 159: c=133; break; //ß
-        case 132: c=127; break; //Ä
-        case 150: c=128; break; //Ö
-        case 156: c=129; break; //Ü
+        case 164: c=130; break; //ï¿½
+        case 182: c=131; break; //ï¿½
+        case 188: c=132; break; //ï¿½
+        case 159: c=133; break; //ï¿½
+        case 132: c=127; break; //ï¿½
+        case 150: c=128; break; //ï¿½
+        case 156: c=129; break; //ï¿½
         default: c=255;
       }
     } else if (c == 194) { //UTF8 char for degree symbol
@@ -640,7 +647,7 @@ void showGain() {
   tft.setCursor(5,23);
   tft.setFont(FNT9);
   tft.setTextColor(ILI9341_BLACK);
-  encodeUnicode("Lautstärke",txt);
+  encodeUnicode("LautstÃ¤rke",txt);
   tft.print(txt);
   showSlider(27,curGain,100);
 }
@@ -729,11 +736,12 @@ void showCommand(uint8_t configPage) {
     //config page 3
     if (configPage == 3) {
         color_temp = ILI9341_GREEN;
+        showAlarmTime();
     } else {
         color_temp = COLOR_KNOEPFE;
     }
     tft.fillRect(128,176,64,64,COLOR_KNOEPFE_BG);
-//    tft.drawBitmap(128,186,num_64_44[2],64,44,color_temp,COLOR_KNOEPFE_BG);
+    tft.drawBitmap(128,186,num_64_44[2],64,44,color_temp,COLOR_KNOEPFE_BG);
     //config page 4
     if (configPage == 4) {
         showGain();
@@ -756,9 +764,15 @@ void showAlarmTime() {
     alarmConfig.h = alarm1 /60;
     alarmConfig.m = alarm1 % 60;
   } else {
-    alarmConfig.alarmday = alarmday2;
-    alarmConfig.h = alarm2 /60;
-    alarmConfig.m = alarm2 % 60;
+    if (configView == 2){
+      alarmConfig.alarmday = alarmday2;
+      alarmConfig.h = alarm2 /60;
+      alarmConfig.m = alarm2 % 60;
+    } else {
+      alarmConfig.alarmday = alarmday3;
+      alarmConfig.h = alarm3 /60;
+      alarmConfig.m = alarm3 % 60;
+    }
   }
   tft.fillRect(0,0,320,176,COLOR_SETTING_BG);
   tft.drawRect(0,0,320,176,COLOR_SETTING_BORDER);
@@ -863,7 +877,7 @@ void showRadioPage() {
     }
     tft.drawBitmap(128,176,knopf_sym[symbol],64,64,color_temp,COLOR_KNOEPFE_BG);
     //Radio
-    if (radio) {//Radio läuft
+    if (radio) {//Radio lÃ¤uft
         color_temp = ILI9341_GREEN;
     } else {
         color_temp = COLOR_KNOEPFE;
@@ -924,7 +938,7 @@ void showNextAlarm(){
 void showDebugInfo(int16_t v1, int16_t v2, int16_t v3){
   char txt[100] = "";
   uint8_t h,m;
-  if (clockmode ) {
+  if (clockmode) {
    sprintf(txt,"Info: v1 = %i, v2 = %i, v3 = %i",v1,v2,v3);
     textInBox(0,220,320,20,txt,ALIGNCENTER,false,ILI9341_WHITE,ILI9341_BLACK,1);
   }
@@ -954,7 +968,7 @@ void FavoriteButtons(){
 
   for (int i = 0; i < STATIONS && loopCount < 10; i++) {
     if (stationlist[i].enabled) {
-      bool active = (actStation == i); // Aktiv für die aktuelle Station
+      bool active = (actStation == i); // Aktiv fÃ¼r die aktuelle Station
       tft.drawBitmap((loopCount % 5) * 64, y, num_64_44[i], 64, 44, active ? COLOR_FAV_BUTTONS_AKTIV : COLOR_FAV_BUTTONS, COLOR_FAV_BUTTONS_BG);
       loopCount++;
       if (loopCount % 5 == 0) {

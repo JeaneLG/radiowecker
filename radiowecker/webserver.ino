@@ -120,7 +120,7 @@ void getAccessData() {
 
 //AJAX command /cmd/getalarms
 void getAlarms() {
-  char buf[45];
+  char buf[61];
   uint8_t h,m,mask,i;
   h = alarm1 /60;
   m = alarm1 % 60;
@@ -128,14 +128,19 @@ void getAlarms() {
   h = alarm2 /60;
   m = alarm2 % 60;
   sprintf(&buf[20],"%02i:%02i\n",h,m);
+  h = alarm3 /60;
+  m = alarm3 % 60;
+  sprintf(&buf[40],"%02i:%02i\n",h,m);
   for (i=0;i<7;i++) {
     mask = 1 << i;
     buf[6+i*2] = ((alarmday1 & mask) != 0)? '1':'0';
     buf[26+i*2] = ((alarmday2 & mask) != 0)? '1':'0';
+    buf[46+i*2] = ((alarmday3 & mask) != 0)? '1':'0';
     buf[7+i*2] = '\n';
     buf[27+i*2] = '\n';
+    buf[47+i*2] = '\n';
   }
-  buf[40] = 0;
+  buf[60] = 0;
   //send access data separated by new line
   //respond with access data
   server.send(200,"text/plain",String(buf));
@@ -166,8 +171,15 @@ void setAlarms() {
     Serial.printf(" = %i\n",alarm2);
     pref.putUInt("alarm2",alarm2);
   }
+  if (server.hasArg("al16")) {
+    alarm3 = stringToMinutes(server.arg("al16"));
+    Serial.print(server.arg("al16"));
+    Serial.printf(" = %i\n",alarm3);
+    pref.putUInt("alarm3",alarm3);
+  }
   alarmday1 = 0;
   alarmday2 = 0;
+  alarmday3 = 0;
   for (uint8_t i=0; i<7; i++) {
     sprintf(txt,"al%i",i+1);
     if (server.hasArg(txt)) {
@@ -177,10 +189,15 @@ void setAlarms() {
     if (server.hasArg(txt)) {
       if (server.arg(txt) == "1") alarmday2 = alarmday2 | (1 << i); 
     }
+    sprintf(txt,"al%i",i+17);
+    if (server.hasArg(txt)) {
+      if (server.arg(txt) == "1") alarmday3 = alarmday3 | (1 << i); 
+    }
   }
   pref.putUShort("alarmday1",alarmday1);
   pref.putUShort("alarmday2",alarmday2);
-  Serial.printf("days1 %x days2 %x\n",alarmday1,2);
+  pref.putUShort("alarmday3",alarmday3);
+  Serial.printf("days1 %x days2 %x days3 %x\n",alarmday1,alarmday2,alarmday3);
   findNextAlarm();
   if (clockmode) showNextAlarm();
   server.send(200,"text/plain","OK");
