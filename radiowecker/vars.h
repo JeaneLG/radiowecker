@@ -1,4 +1,4 @@
-//global vars for radiowecker not defined in ino file
+//global vars and definitions for radiowecker not defined in ino file
 #ifndef RADIOWECKER_VARS_h
 #define RADIOWECKER_VARS_h
 
