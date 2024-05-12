@@ -3,9 +3,9 @@
 
 <div align="center">
 
-|[:skull:ISSUE](https://github.com/beabel/radiowecker/issues?q=is%3Aissue)|[:speech_balloon: Forum /Discussion](https://github.com/beabel/radiowecker/discussions?discussions_q=)|[:grey_question:WiKi](https://github.com/beabel/radiowecker/wiki)|
+|[:skull:ISSUE](https://github.com/JeaneLG/radiowecker/issues?q=is%3Aissue)|[:speech_balloon: Forum /Discussion](https://github.com/JeaneLG/radiowecker/discussions?discussions_q=)|[:grey_question:WiKi](https://github.com/JeaneLG/radiowecker/wiki)|
 |--|--|--|
-|![GitHub issues](https://img.shields.io/github/issues/beabel/radiowecker)![GitHub closed issues](https://img.shields.io/github/issues-closed/beabel/radiowecker)|![GitHub Discussions](https://img.shields.io/github/discussions/beabel/radiowecker)![GitHub User's stars](https://img.shields.io/github/stars/beabel)|![GitHub release (with filter)](https://img.shields.io/github/v/release/beabel/radiowecker)
+|![GitHub issues](https://img.shields.io/github/issues/JeaneLG/radiowecker)![GitHub closed issues](https://img.shields.io/github/issues-closed/JeaneLG/radiowecker)|![GitHub Discussions](https://img.shields.io/github/discussions/JeaneLG/radiowecker)![GitHub User's stars](https://img.shields.io/github/stars/JeaneLG)|![GitHub release (with filter)](https://img.shields.io/github/v/release/JeaneLG/radiowecker)
 
 
 </div>
