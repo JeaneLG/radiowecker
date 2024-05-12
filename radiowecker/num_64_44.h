@@ -1,3 +1,6 @@
+#ifndef NUM_64_44_h
+#define NUM_64_44_h
+
 const unsigned char num_64_44 PROGMEM [10][360] = {
   {
     // '1_64_44, 64x44px
@@ -241,3 +244,5 @@ const unsigned char num_64_44 PROGMEM [10][360] = {
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff    
   }
 };
+
+#endif

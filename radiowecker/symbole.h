@@ -1,3 +1,5 @@
+#ifndef SYMBOLE_h
+#define SYMBOLE_h
 const unsigned char symbole PROGMEM [6][308] = {
 	{
   // [0] 'wifi-solid_15, 17x17px
@@ -100,3 +102,4 @@ const unsigned char symbole2 PROGMEM [2][64] = {
     0x00, 0x03, 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00
   }
 };
+#endif
