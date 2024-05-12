@@ -73,7 +73,7 @@ void MDCallback(void *cbData, const char *type, bool isUnicode, const char *stri
     title[sizeof(title)-1] = 0;
     Serial.printf(" %s\n", title);
     //show the message on the display
-  newTitle = true;
+    newTitle = true;
   } else {
     // Who knows what to do?  Not me!
   };

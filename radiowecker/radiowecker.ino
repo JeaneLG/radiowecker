@@ -19,8 +19,12 @@
 // pin for Beeper
 #define BEEPER 21
 
+// pin for touch sensor for alarm pause
+#define PAUSE_PIN 32
+#define PAUSE_TOUCH_SENSE 25
+
 // programm version
-#define VERSION "2.2.2"
+#define PROGRAM_VERSION "2.3.8"
 
 //instance of prefernces
 Preferences pref;
@@ -46,6 +50,7 @@ uint8_t curStation = 0;           //index for current selected station in statio
 uint8_t curGain = 200;            //current loudness
 uint8_t snoozeTime = 30;          //snooze time in minutes
 uint8_t alarmPauseTime = 10;      //alarm pause time in minutes
+int16_t alarmResumeTime = -1;     //minutes from midnight for alarm resume
 uint16_t alarm1 = 390;            //first alarm time 6:30
 uint8_t alarmday1 = 0B00111110;   //valid weekdays (example 00111110 means monday through friday)
 uint16_t alarm2 = 480;            //second alarm time 8:00
@@ -72,6 +77,7 @@ uint32_t start_conf;              //time of entering config screen
 boolean connected;                //flag to signal active connection
 boolean radio = false;            //flag to signal radio output
 boolean alarmOn = false;          //flag to signal alarm is ongoing
+boolean alarmPause = false;       //flag to signal if alarm is paused
 boolean clockmode = true;         //flag to signal clock is shown on the screen
 boolean configpage = false;       //flag to signal config is shown on the screen
 boolean radiopage = false;        //flag to signal radioselect is shown on the screen
@@ -150,6 +156,7 @@ void setup() {
   if (pref.isKey("alarm3")) alarm3 = pref.getUInt("alarm3");
   alarmday3 = 0B00000000; //off
   if (pref.isKey("alarmday3")) alarmday3 = pref.getUShort("alarmday3");
+  if (pref.isKey("alarmPauseTime")) alarmPauseTime = pref.getUShort("alarmPauseTime");
   alarmtime = 0;
   alarmday = 8; //alarm is off
   curStation = 0; //default value
@@ -158,6 +165,8 @@ void setup() {
   if (curStation >= STATIONS) curStation = 0; //check to avoid invalid station number
   actStation = curStation;   //set active station to current station 
   Serial.printf("station %i, gain %i, ssid %s, ntp %s\n", curStation, curGain, ssid.c_str(), ntp.c_str());
+  //setup buzzer pin
+  pinMode(BEEPER, OUTPUT);
   //run setup functions in the sub parts
   setup_audio(); //setup audio streams
   setup_display(); //setup display interface
@@ -180,7 +189,7 @@ void setup() {
     weekday = ti.tm_wday;
     Serial.println("Start");
     Serial.print("Version: ");
-    Serial.println(VERSION);
+    Serial.println(PROGRAM_VERSION);
     //if alarm is on get date and time for next alarm
     if (pref.isKey("alarmon") && pref.getBool("alarmon")) findNextAlarm();
     //Display time and next alarm if one is set
@@ -224,6 +233,17 @@ void loop() {
     showTitle();
     newTitle = false;
   }
+  // if alarm is on check for alarm pause
+  if (alarmOn && (touchRead(PAUSE_PIN) < PAUSE_TOUCH_SENSE)){
+    delay(10);
+    // take probe again to reduce false meassurement
+    if (touchRead(PAUSE_PIN) < PAUSE_TOUCH_SENSE){
+      // pause alarm for alarmPauseTime
+      alarmPause = true;
+      alarmResumeTime = minutes + alarmPauseTime;
+      toggleRadio(true); //switch radio off
+    }
+  }
   //detect a disconnect
   if (connected && (WiFi.status() != WL_CONNECTED)){
     connected = false;
@@ -259,7 +279,7 @@ void loop() {
   }
   //timed event updatetime display every minute
   if ((millis() - tick) > 60000) {
-    tick = millis() - ti.tm_sec * 1000 + 500;//kingherold ISSUE Time not correct
+    tick = millis() - ti.tm_sec * 1000 + 100;//kingherold ISSUE Time not correct
     //get date and time information
     if (connected && getLocalTime(&ti)) {
       minutes = ti.tm_hour * 60 + ti.tm_min;
@@ -270,27 +290,41 @@ void loop() {
       setBGLight(bright);
       displayDateTime();
     }
-    //if we are in snooze mode decrement snooze counter
-    //and turn radio off if snooze counter is zero
+    //turn radio off if snooze counter is zero
     if (snoozeEndTime > -1) {
       // handle endtime after midnight
       if ((snoozeEndTime >= MINUTES_PER_DAY) && (minutes < 10)) snoozeEndTime -= MINUTES_PER_DAY;
       // check if sleep time is over
       if (minutes >= snoozeEndTime) {
-        snoozeEndTime= -1;
+        snoozeEndTime = -1;
         toggleRadio(true);
         showRadio();
       }
+    }
+    //if alarm is paused check if we have to resume it
+    if (alarmPause || alarmResumeTime > -1) {
+      // handle endtime after midnight
+      if ((alarmResumeTime >= MINUTES_PER_DAY) && (minutes < 5)) alarmResumeTime -= MINUTES_PER_DAY;
+      // check if sleep time is over
+      if (minutes >= alarmResumeTime) {
+        alarmResumeTime = -1;
+        alarmOn = true;
+        alarmPause = false;
+        toggleRadio(false);
+        showRadio();
+        drawAlarmPauseInfo();
+        showNextAlarm();
+      }      
     }
     //if an alarm is activated check for day and time
     if ((alarmday < 8) && getLocalTime(&ti)) {
       //if alarm day and time is reached turn radio on and get values for next expected alarm
       if ((alarmday == weekday) && ((minutes == alarmtime) || (minutes == (alarmtime+1)))) {
-        // Test Beeper#####################     
+        // Test Beeper#####################
 
-        // Test Beeper#####################        
-        toggleRadio(false);
+        // Test Beeper#####################
         alarmOn = true;
+        toggleRadio(false);
         showRadio();
         findNextAlarm();
         showNextAlarm();
@@ -299,4 +333,12 @@ void loop() {
   }
   //do a restart if device was disconnected for more then 5 minutes
   if (!connected && ((millis() - discon) > 300000)) ESP.restart();
+}
+
+// if no Radio is availabe use beeper for alarm
+void beeperAlarm(){
+  for (int i=0; i++; i<30) {
+    tone(BEEPER, 250, 100);
+    delay (500);
+  }
 }
