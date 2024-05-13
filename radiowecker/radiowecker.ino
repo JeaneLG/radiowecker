@@ -24,7 +24,7 @@
 #define PAUSE_TOUCH_SENSE 25
 
 // programm version
-#define RADIOVERSION "2.3.8"
+#define RADIOVERSION "2.9.9"
 
 //instance of prefernces
 Preferences pref;
