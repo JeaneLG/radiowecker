@@ -187,7 +187,7 @@ void showAlarmTime() {
   tft.print("  ");
   tft.setTextColor(COLOR_SETTING_BORDER2, COLOR_SETTING_BG);
   tft.print("Version: ");
-  tft.print(PROGRAM_VERSION);
+  tft.print(RADIOVERSION);
   tft.setTextSize(2);
   tft.setTextColor(COLOR_SETTING_ALARM_TEXT, COLOR_SETTING_BG);
   tft.setCursor(150, 140);
