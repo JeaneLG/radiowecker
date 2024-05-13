@@ -25,7 +25,7 @@
 |[1 x Lautsprecher Set](https://amzn.to/3SSyQNR)|:white_check_mark:|:white_check_mark:|:white_check_mark:|
 |[1 x Widerstand 470 kOhm](https://amzn.to/3Sw17cL)|:white_check_mark:|:white_check_mark:|:white_check_mark:(1x470kOhm)|
 |[DC Einbaubuchse](https://amzn.to/47it0ZY)|:white_check_mark:|:x:|:x:|
-|[1 x LDR](https://amzn.to/3FQYCKq)|:white_check_mark:|:x:|:x:|
+|[1 x LDR](https://de.aliexpress.com/item/1005005686593216.html?spm=a2g0o.detail.pcDetailTopMoreOtherSeller.3.ea26A9qMA9qMU1&gps-id=pcDetailTopMoreOtherSeller&scm=1007.40050.354490.0&scm_id=1007.40050.354490.0&scm-url=1007.40050.354490.0&pvid=502dbab5-c2dc-4ed9-bb2b-68eed9b1ec68&_t=gps-id:pcDetailTopMoreOtherSeller,scm-url:1007.40050.354490.0,pvid:502dbab5-c2dc-4ed9-bb2b-68eed9b1ec68,tpp_buckets:668%232846%238108%231977&pdp_npi=4%40dis%21EUR%211.02%211.02%21%21%211.07%211.07%21%40211b801917155988644807966ef794%2112000034009081343%21rec%21DE%214183551953%21&utparam-url=scene%3ApcDetailTopMoreOtherSeller%7Cquery_from%3A)|:white_check_mark:|:x:|:x:|
 ||~95,-|~54,-|~37,-|
 
 [German Version below / Deutsche Version unten:point_down:](#german-version)
@@ -36,6 +36,12 @@ I have extended and adapted this project.
 
 The main changes include:
 
+1. Alarm settings can be edited on touchscreen
+2. Nov up to three alarms can be used
+3. Alarm can be paused using additional touch pin
+4. Major bugfixes
+
+The main changes from beabel:
 1. customizable colors.
 2. more information on the main page.
 3. splitting the radio and settings pages to make space for favorites buttons.
@@ -56,6 +62,12 @@ Ich habe dieses Projekt erweitert und angepasst.
 
 Die wesentlichen Änderungen umfassen:
 
+1. Die Alarm Einstellungen können auf dem Touchscrenn geändert werden
+2. Es können bis zu drei Alarme eingestellt werden
+3. Der Alarm kann pausiert werden. Dazu wird ein Touch Pin des ESP32 verwendet.
+4. Wichtige Bug Fixes
+
+Die wesentlichen Änderungen von beabel:
 1. Anpassbare Farben.
 2. Mehr Informationen auf der Hauptseite.
 3. Aufteilung der Radio- und Einstellungsseiten, um Platz für Favoritentasten zu schaffen.
