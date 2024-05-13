@@ -471,7 +471,7 @@ function checkForUpdate(currentVersion) {
 
 function updateGitHubInfo() {
   $.ajax({
-    url: "https://api.github.com/repos/beabel/radiowecker",
+    url: "https://api.github.com/repos/JeaneLG/radiowecker",
     type: "GET",
     dataType: "json",
     success: function (data) {
@@ -497,7 +497,7 @@ function updateGitHubInfo() {
       html += '<a href="' + data.html_url + '/wiki" target="_blank"><i class="fas fa-info"></i> Wiki</a> ';
       html += '<a href="' + data.html_url + '/discussions" target="_blank"><i class="fas fa-users"></i> Forum</a></p>';
       html += '<p>Letztes Update: ' + formattedDate + '</p>';
-      html += '<p>Created with <i class="fas fa-heart"></i> by kunigunde</p>';
+      html += '<p>Created with <i class="fas fa-heart"></i> by JeaneLG</p>';
       html += '</div>';
       $("#footer").html(html);
     },
